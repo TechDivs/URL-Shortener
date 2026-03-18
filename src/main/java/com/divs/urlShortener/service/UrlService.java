@@ -1,8 +1,8 @@
 package com.divs.urlShortener.service;
 
 import java.time.Instant;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.divs.urlShortener.model.Url;
@@ -11,7 +11,7 @@ import com.divs.urlShortener.repository.UrlRepository;
 
 @Service
 public class UrlService {
-    private UrlRepository urlRepository;
+    private final UrlRepository urlRepository;
     
     public UrlService(UrlRepository urlRepository) {
         this.urlRepository=urlRepository;
@@ -35,6 +35,7 @@ public class UrlService {
         return shortCode;
     }
 
+
     private String encodeBase62(String hex) {
         String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         java.math.BigInteger num = new java.math.BigInteger(hex, 16);
@@ -48,5 +49,20 @@ public class UrlService {
         }
 
         return sb.reverse().toString();
+    }
+
+
+    public String getOriginalString(String shortCode) {
+        Instant now = Instant.now();
+        Optional<Url> url = urlRepository.findByShortCode(shortCode);
+        if(url.isPresent()) {
+            Url u = url.get();
+            if(now.isAfter(u.getExpiresAt())) {
+                throw new RuntimeException("URL Expired !");
+            }
+            return u.getOriginalUrl();
+        }
+
+        throw new RuntimeException("URL Not Found !");
     }
 }
