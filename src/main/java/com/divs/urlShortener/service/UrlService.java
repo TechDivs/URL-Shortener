@@ -1,11 +1,14 @@
 package com.divs.urlShortener.service;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.divs.urlShortener.dto.TopUrlResponse;
 import com.divs.urlShortener.model.Url;
 import com.divs.urlShortener.repository.UrlRepository;
 
@@ -31,10 +34,12 @@ public class UrlService {
         url.setExpiresAt(now.plusSeconds(ttl));
         url = urlRepository.save(url);
 
-        String shortCode = encodeBase62(url.getId().toHexString());
+        String hex = url.getId().toHexString();
+        hex = hex.substring(hex.length() - 12);
+        String shortCode = encodeBase62(hex);
+        
         url.setShortCode(shortCode);
         urlRepository.save(url);
-        
         return shortCode;
     }
 
@@ -84,5 +89,17 @@ public class UrlService {
         }
 
         throw new RuntimeException("URL Not Found !");
+    }
+
+
+    public List<TopUrlResponse> getTop10Urls() {
+        List<Url> urls = urlRepository.findTop10ByOrderByClickCountDesc();
+        List<TopUrlResponse> result = new ArrayList<>();
+
+        for(Url u:urls) {
+            result.add(new TopUrlResponse(u.getOriginalUrl(),u.getShortCode(),u.getClickCount()));
+        }
+
+        return result;
     }
 }

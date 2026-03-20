@@ -3,7 +3,11 @@ package com.divs.urlShortener.controller;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.divs.urlShortener.dto.CreateUrlRequest;
+import com.divs.urlShortener.dto.TopUrlResponse;
+import com.divs.urlShortener.model.Url;
 import com.divs.urlShortener.service.UrlService;
+
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +16,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -48,5 +54,11 @@ public class UrlController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+
+    @GetMapping("/top-urls")
+    public ResponseEntity<List<TopUrlResponse>> getTopUrls() {
+        return ResponseEntity.ok(urlService.getTop10Urls());
     }
 }

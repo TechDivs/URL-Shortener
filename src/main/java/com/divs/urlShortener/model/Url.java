@@ -2,6 +2,7 @@ package com.divs.urlShortener.model;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -17,6 +18,7 @@ public class Url {
     private Instant createdAt;
     @Indexed(expireAfterSeconds = 0)
     private Instant expiresAt;
+    @Indexed(direction = IndexDirection.DESCENDING)
     private Long clickCount;
 
     public ObjectId getId() {
