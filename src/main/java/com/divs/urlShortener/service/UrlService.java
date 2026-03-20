@@ -2,7 +2,8 @@ package com.divs.urlShortener.service;
 
 import java.time.Instant;
 import java.util.Optional;
-
+import java.util.concurrent.TimeUnit;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.divs.urlShortener.model.Url;
@@ -12,9 +13,11 @@ import com.divs.urlShortener.repository.UrlRepository;
 @Service
 public class UrlService {
     private final UrlRepository urlRepository;
+    private RedisTemplate<String,String> redisTemplate;
     
-    public UrlService(UrlRepository urlRepository) {
+    public UrlService(UrlRepository urlRepository, RedisTemplate<String,String> redisTemplate) {
         this.urlRepository=urlRepository;
+        this.redisTemplate=redisTemplate;
     }
 
     public String createShortUrl(String originalUrl, long ttl) {
@@ -53,13 +56,29 @@ public class UrlService {
 
 
     public String getOriginalString(String shortCode) {
+        String key = "url:" + shortCode;
+        String cached = redisTemplate.opsForValue().get(key);
+
+        if(cached!=null) {
+            System.out.println("Found in redis: " + cached);
+            redisTemplate.opsForValue().increment("clicks:"+shortCode);
+            return cached;
+        }
+
         Instant now = Instant.now();
-        Optional<Url> url = urlRepository.findByShortCode(shortCode);
+        Optional<Url> url = urlRepository.findByshortCode(shortCode);
         if(url.isPresent()) {
             Url u = url.get();
             if(now.isAfter(u.getExpiresAt())) {
                 throw new RuntimeException("URL Expired !");
             }
+
+            long ttl = u.getExpiresAt().getEpochSecond() - Instant.now().getEpochSecond();
+            if(ttl>0) {
+                redisTemplate.opsForValue().set(key, u.getOriginalUrl(), ttl, TimeUnit.SECONDS);
+            }
+
+            redisTemplate.opsForValue().increment("clicks:" + shortCode);
             return u.getOriginalUrl();
         }
 

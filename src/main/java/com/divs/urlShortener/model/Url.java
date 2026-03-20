@@ -1,8 +1,5 @@
 package com.divs.urlShortener.model;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -11,8 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.Instant;
 
 @Document(collection = "urls")
-@Getter
-@Setter
 public class Url {
     @Id
     private ObjectId id;
@@ -23,4 +18,41 @@ public class Url {
     @Indexed(expireAfterSeconds = 0)
     private Instant expiresAt;
     private Long clickCount;
+
+    public ObjectId getId() {
+        return id;
+    }
+    public void setId(ObjectId id) {
+        this.id = id;
+    }
+    public String getOriginalUrl() {
+        return originalUrl;
+    }
+    public void setOriginalUrl(String originalUrl) {
+        this.originalUrl = originalUrl;
+    }
+    public String getShortCode() {
+        return shortCode;
+    }
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+    public void setExpiresAt(Instant expiresAt) {
+        this.expiresAt = expiresAt;
+    }
+    public Long getClickCount() {
+        return clickCount;
+    }
+    public void setClickCount(Long clickCount) {
+        this.clickCount = clickCount;
+    }
 }

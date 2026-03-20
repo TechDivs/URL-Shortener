@@ -9,5 +9,5 @@ import com.divs.urlShortener.model.Url;
 
 
 public interface UrlRepository extends MongoRepository<Url,ObjectId>{
-    Optional<Url> findByShortCode(String shortCode);
+    Optional<Url> findByshortCode(String shortCode);
 }
