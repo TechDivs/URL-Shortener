@@ -13,7 +13,7 @@ import com.divs.urlShortener.repository.UrlRepository;
 @Service
 public class UrlService {
     private final UrlRepository urlRepository;
-    private RedisTemplate<String,String> redisTemplate;
+    private final RedisTemplate<String,String> redisTemplate;
     
     public UrlService(UrlRepository urlRepository, RedisTemplate<String,String> redisTemplate) {
         this.urlRepository=urlRepository;
@@ -60,8 +60,9 @@ public class UrlService {
         String cached = redisTemplate.opsForValue().get(key);
 
         if(cached!=null) {
-            System.out.println("Found in redis: " + cached);
+            // System.out.println("Found in redis: " + cached);
             redisTemplate.opsForValue().increment("clicks:"+shortCode);
+            redisTemplate.opsForSet().add("dirty_urls", shortCode);
             return cached;
         }
 
